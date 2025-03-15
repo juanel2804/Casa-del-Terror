@@ -2,6 +2,7 @@ body {
     margin: 0;
     overflow: hidden;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
@@ -9,5 +10,64 @@ body {
 }
 
 canvas {
+    width: 90vw; /* Ajuste para dispositivos pequeños */
+    height: 70vh; /* Mantener proporción */
+    max-width: 1200px; /* Evitar que sea demasiado grande en pantallas grandes */
+    max-height: 800px;
+    
+   padding: 2px;
+    background: black; /* Mantiene el fondo negro */
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden; /* Evita que se salga de la pantalla */
+        
+    /* Redondear bordes */
+    border-radius: 25px;
+
+    /* Borde simulado */
+    border: 5px dashed rgba(0, 0, 0, 0.7); /* Borde quemado naranja */
+    
+    /* Efecto de quemado */
+    filter: drop-shadow(0px 0px 15px rgba(255, 140, 0, 0.6)) 
+            drop-shadow(0px 0px 30px rgba(0, 0, 0, 0.9));
+
+    /* Sombras internas y externas */
+    box-shadow: 
+        inset 0px 0px 20px rgba(0, 0, 0, 0.8), /* Sombra interna oscura */
+        0px 0px 15px rgba(255, 69, 0, 0.8); /* Brillo naranja simulando fuego */
+}
+
+
+/* Contenedor de objetos */
+.objetos-container {
+    width: 80vw; /* Igual al ancho del canvas */
+    text-align: center;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 15px;
+    color: white;
+    font-size: 18px;
+    font-family: Arial, sans-serif;
+}
+
+/* Lista de objetos */
+.objetos-lista {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Miniaturas de los objetos */
+.objetos-lista img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10px;
     border: 2px solid white;
 }
+
+
