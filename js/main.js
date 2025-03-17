@@ -4,6 +4,11 @@ let startTime;
 
 // Esperar hasta que el usuario ingrese su nombre
 document.getElementById("start-button").addEventListener("click", function () {
+    if (imagesLoaded < allImages.length) {
+        alert("Las imágenes aún se están cargando. Por favor, espera unos segundos.");
+        return;
+    }
+
     const playerName = document.getElementById("player-name").value.trim();
 
     if (playerName === "") {
@@ -15,30 +20,32 @@ document.getElementById("start-button").addEventListener("click", function () {
     localStorage.setItem("playerName", playerName);
     startTime = new Date().getTime(); // Guarda el tiempo de inicio en milisegundos
 
-    // Ocultar pantalla de inicio y mostrar el juego
+    // 🔹 **Reiniciar variables del juego**
+    foundImages.clear();
+    isRevealing = false;
+    imagePositions = [];
+    demonioPosition = null;
+    localStorage.setItem("playerLosses", "0"); // Resetear las pérdidas para el nuevo jugador
+
+    // 🔹 **Restaurar miniaturas**
+    miniaturas.forEach(img => img.style.opacity = "1");
+
+    // 🔹 **Actualizar posiciones de imágenes**
+    updateImagePositions();
+    renderScene();
+
+    // 🔹 **Reiniciar música**
+    backgroundMusic.currentTime = 0;
+    backgroundMusic.play();
+
+    // 🔹 **Restablecer la pantalla del juego**
     document.getElementById("start-screen").style.opacity = "0";
     setTimeout(() => {
         document.getElementById("start-screen").style.display = "none";
     }, 500);
-
 });
 
 
-// Esperar hasta que el usuario ingrese su nombre
-document.getElementById("start-button").addEventListener("click", function () {
-    const playerName = document.getElementById("player-name").value.trim();
-
-    if (playerName === "") {
-        alert("Por favor, ingrese su nombre.");
-        return;
-    }
-
-    // Guardar el nombre en una variable global (opcionalmente en localStorage)
-    localStorage.setItem("playerName", playerName);
-
-    // Ocultar la pantalla de inicio y mostrar el juego
-    document.getElementById("start-screen").style.display = "none";
-});
 
 
 const canvas = document.getElementById("canvas");
@@ -60,6 +67,7 @@ window.addEventListener("load", () => {
 // Función para reproducir sonidos aleatorios de voz mientras se juega
 function iniciarSonidosAleatorios() {
     setInterval(() => {
+        const videoContainer = document.getElementById("video-container");
         if (!videoContainer.style.display.includes("flex")) {
             voiceSound.play();
         }
@@ -112,15 +120,7 @@ winContainer.innerHTML = `
         Has encerrado al demonio.
     </div>
     <div class="buttons-container" style="display: flex; gap: 20px; margin-top: 30px;">
-        <button id="retry-win" style="
-            font-size: 20px;
-            padding: 10px 20px;
-            background-color: red;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-        ">Volver a Intentar</button>
+       
         <button id="go-to-home-win" style="
             font-size: 20px;
             padding: 10px 20px;
@@ -163,7 +163,6 @@ imageFiles.forEach((src, index) => {
     miniaturas.push(imgElement);
 });
 
-const images = [];
 const imgSize = 50;
 let imagePositions = [];
 
@@ -171,25 +170,14 @@ let foundImages = new Set(); // Guardará los índices de las imágenes encontra
 
 // Función para verificar si todas las imágenes han sido encontradas
 function checkWinCondition() {
-    console.log("🟡 Verificando imágenes encontradas...");
-    console.log("Imágenes encontradas hasta ahora:", Array.from(foundImages));
-
-    let indicesEsperados = new Set([...Array(imageFiles.length).keys()]); // Genera {0,1,2,3,4,5,6,7}
-    console.log("✅ Se espera que estén descubiertas estas imágenes:", Array.from(indicesEsperados));
-
+    let indicesEsperados = new Set([...Array(imageFiles.length).keys()]);
     let todasDescubiertas = [...indicesEsperados].every(index => foundImages.has(index));
 
     if (todasDescubiertas) {
         console.log("🎉 ¡Todas las imágenes han sido encontradas!");
-
         setTimeout(() => {
-            if (typeof registrarTiempo === "function") {
-                registrarTiempo(); // Guardar el puntaje antes de mostrar la pantalla de victoria
-            } else {
-                console.error("⚠️ Error: registrarTiempo no está definida.");
-            }
-            console.log("🟢 Mostrando pantalla de 'Felicidades'...");
-            winContainer.style.display = "flex"; // Mostrar la pantalla de victoria
+            registrarTiempo(true); // ✅ Ahora se registra correctamente solo si gana
+            winContainer.style.display = "flex";
         }, 500);
     } else {
         console.log("❌ Aún faltan imágenes por encontrar.");
@@ -246,10 +234,28 @@ function updateImagePositions() {
 }
 
 // Cargar todas las imágenes
+const images = [];
+let imagesLoaded = 0; // Contador para verificar si todas las imágenes han sido cargadas
+
 allImages.forEach((src, index) => {
     images[index] = new Image();
     images[index].src = `../fondo/${src}`;
+
+    // Verificar que todas las imágenes se hayan cargado antes de iniciar el juego
+    images[index].onload = () => {
+        imagesLoaded++; // Incrementar el contador cuando una imagen se carga
+        if (imagesLoaded === allImages.length) {
+            console.log("✅ Todas las imágenes han sido cargadas.");
+            resizeCanvas(); // Ajustar el canvas correctamente
+            renderScene(); // Ahora sí dibujamos el juego
+        }
+    };
+
+    images[index].onerror = () => {
+        console.error(`❌ Error al cargar la imagen: ${src}`);
+    };
 });
+
 
 // Función para dibujar la escena completa con imágenes ocultas
 function renderScene() {
@@ -424,92 +430,92 @@ window.addEventListener("resize", resizeCanvas);
 // Función para actualizar la tabla de puntuaciones
 function actualizarTabla() {
     const tbody = document.querySelector("#score-table tbody");
-    tbody.innerHTML = ""; // Limpiar la tabla antes de actualizarla
+    tbody.innerHTML = ""; 
 
-    // Obtener los puntajes almacenados
     const scores = JSON.parse(localStorage.getItem("scores")) || [];
+    let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
 
     scores.forEach((score) => {
         const row = document.createElement("tr");
         row.innerHTML = `
             <td>${score.name}</td>
-            <td>${score.time} s</td>
+            <td>${score.time ? `${score.time} s` : "-"}</td>
             <td>${score.losses}</td>
         `;
         tbody.appendChild(row);
     });
+
+    // Agregar la cantidad de derrotas del jugador actual si aún no ha ganado
+    const playerName = localStorage.getItem("playerName");
+    if (playerName && playerLosses > 0) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${playerName}</td>
+            <td>-</td>
+            <td>${playerLosses}</td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    console.log("📊 Tabla de puntajes actualizada.");
 }
+
+
 
 
 // Función para reiniciar el juego sin perder el nombre y los datos
-// Función para reiniciar el juego sin perder el nombre y acumulando las pérdidas
-// Función para reiniciar el juego sin perder el nombre y acumulando las pérdidas
 function restartGame() {
     setTimeout(() => {
-        // Guardar el tiempo final antes de reiniciar
-        const endTime = new Date().getTime();
-        const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convertir a segundos
-
-        // Obtener datos previos del jugador
-        const playerName = localStorage.getItem("playerName") || "Jugador";
         let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
-        let scores = JSON.parse(localStorage.getItem("scores")) || [];
+        playerLosses++; // Incrementar derrotas
+        localStorage.setItem("playerLosses", playerLosses); // Guardar en localStorage
 
-        // Registrar la pérdida en la tabla antes de reiniciar
-        scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+        console.log(`💀 ${localStorage.getItem("playerName")} ha perdido ${playerLosses} veces.`);
 
-        // Ordenar la tabla por menor tiempo
-        scores.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
-        localStorage.setItem("scores", JSON.stringify(scores));
-
-        // Sumar una pérdida al contador y guardarlo
-        playerLosses++;
-        localStorage.setItem("playerLosses", playerLosses);
-
-        // Ocultar la pantalla de Game Over
         gameOverContainer.style.display = "none";
         winContainer.style.display = "none";
 
-        // 🔹 **Reiniciar completamente el juego sin recargar la página**
-        foundImages.clear(); // Limpiar las imágenes encontradas
-        isRevealing = false; // Restablecer la linterna
-        imagePositions = []; // Borrar posiciones de imágenes
-        demonioPosition = null; // Resetear la posición del demonio
+        foundImages.clear();
+        isRevealing = false;
+        imagePositions = [];
+        demonioPosition = null;
 
-        // 🔹 **Reiniciar el canvas y volver a generar las imágenes**
         updateImagePositions();
         renderScene();
 
-        // Restaurar opacidad de todas las miniaturas
         miniaturas.forEach(img => img.style.opacity = "1");
 
-        // Reiniciar música desde el inicio
         backgroundMusic.currentTime = 0;
         backgroundMusic.play();
 
-        // Reiniciar el tiempo de inicio de la nueva partida
         startTime = new Date().getTime();
-
+        actualizarTabla(); // Asegurar que la tabla se actualiza con las derrotas
     }, 500);
 }
 
-function registrarTiempo() {
-    const playerName = localStorage.getItem("playerName"); // Obtener nombre del jugador
+
+function registrarTiempo(haGanado) {
+    const playerName = localStorage.getItem("playerName");
     if (!playerName) return;
 
-    const endTime = new Date().getTime(); // Obtener tiempo final
-    const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convertir a segundos
-
-    let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
     let scores = JSON.parse(localStorage.getItem("scores")) || [];
+    let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
 
-    scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+    if (haGanado) {
+        const endTime = new Date().getTime();
+        const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+        scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+        console.log(`🏆 ${playerName} ganó en ${timeTaken} segundos con ${playerLosses} derrotas.`);
+    } else {
+        console.log(`💀 ${playerName} ha perdido. No se registra el tiempo.`);
+    }
 
     scores.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
     localStorage.setItem("scores", JSON.stringify(scores));
-
-    console.log("🏆 Tiempo registrado:", timeTaken, "segundos");
+    actualizarTabla();
 }
+
+
 
 function limpiarTodoLocalStorage() {
     localStorage.clear(); // 🧹 Borra todo el almacenamiento local
