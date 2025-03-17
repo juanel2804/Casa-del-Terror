@@ -1,3 +1,46 @@
+
+// Almacenar tiempo de inicio cuando el usuario ingrese su nombre
+let startTime;
+
+// Esperar hasta que el usuario ingrese su nombre
+document.getElementById("start-button").addEventListener("click", function () {
+    const playerName = document.getElementById("player-name").value.trim();
+
+    if (playerName === "") {
+        alert("Por favor, ingrese su nombre.");
+        return;
+    }
+
+    // Guardar el nombre y el tiempo de inicio
+    localStorage.setItem("playerName", playerName);
+    startTime = new Date().getTime(); // Guarda el tiempo de inicio en milisegundos
+
+    // Ocultar pantalla de inicio y mostrar el juego
+    document.getElementById("start-screen").style.opacity = "0";
+    setTimeout(() => {
+        document.getElementById("start-screen").style.display = "none";
+    }, 500);
+
+});
+
+
+// Esperar hasta que el usuario ingrese su nombre
+document.getElementById("start-button").addEventListener("click", function () {
+    const playerName = document.getElementById("player-name").value.trim();
+
+    if (playerName === "") {
+        alert("Por favor, ingrese su nombre.");
+        return;
+    }
+
+    // Guardar el nombre en una variable global (opcionalmente en localStorage)
+    localStorage.setItem("playerName", playerName);
+
+    // Ocultar la pantalla de inicio y mostrar el juego
+    document.getElementById("start-screen").style.display = "none";
+});
+
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
@@ -41,6 +84,10 @@ gameOverContainer.innerHTML = `
     <div style="color: red; font-size: 50px; font-weight: bold; text-align: center;">
         GAME OVER
     </div>
+    <div class="buttons-container">
+        <button id="retry-game">Volver a Intentar</button>
+        <button id="go-to-home">Inicio</button>
+    </div>
 `;
 document.body.appendChild(gameOverContainer);
 
@@ -61,11 +108,18 @@ winContainer.innerHTML = `
     <div style="color: white; font-size: 40px; font-weight: bold; text-align: center;">
         ¡FELICIDADES! <br> Has encerrado al demonio.
     </div>
+    <div class="buttons-container">
+        <button id="retry-win">Volver a Intentar</button>
+        <button id="go-to-home-win">Inicio</button>
+    </div>
 `;
 document.body.appendChild(winContainer);
 
 // Bandera para controlar los clics
 let isRevealing = false;
+
+let losses = 0; // Contador de veces que el jugador ha perdido
+
 
 // Cargar imagen de fondo
 const img = new Image();
@@ -231,6 +285,9 @@ canvas.addEventListener("click", function (e) {
 
                 // Esperar 0.3s antes de mostrar la pantalla de Game Over
                 setTimeout(() => {
+                    losses++; // Aumentar el contador de pérdidas cada vez que pierda
+                    localStorage.setItem("playerLosses", losses); // Guardarlo en localStorage
+
                     gameOverContainer.style.display = "flex"; // Mostrar "Game Over"
                 }, 300);
             }
@@ -255,6 +312,7 @@ canvas.addEventListener("click", function (e) {
                 // Comprobar si todas las imágenes han sido encontradas
                 if ([...foundImages].filter(i => i !== "demonio").length === imageFiles.length) {
                     setTimeout(() => {
+                        registrarTiempo(); // Registrar el puntaje antes de mostrar la pantalla de victoria
                         winContainer.style.display = "flex"; // Mostrar "Felicidades"
                     }, 500);
                 }
@@ -271,8 +329,117 @@ canvas.addEventListener("click", function (e) {
 function activarVideoMiedo() {
     scaryScream.play(); // Reproducir el grito
     backgroundMusic.pause(); // Pausar la música de fondo
+
+    // Función para calcular el tiempo transcurrido y guardarlo en la tabla
+    function registrarTiempo() {
+        const playerName = localStorage.getItem("playerName"); // Obtener nombre del jugador
+        if (!playerName) return;
+    
+        const endTime = new Date().getTime(); // Obtener tiempo final
+        const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convertir a segundos
+    
+        // Obtener la cantidad de veces que perdió el jugador antes de ganar
+        let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
+    
+        // Obtener datos previos del localStorage
+        let scores = JSON.parse(localStorage.getItem("scores")) || [];
+    
+        // Agregar la nueva entrada de puntaje
+        scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+    
+        // Ordenar la tabla por tiempo (menor tiempo es mejor)
+        scores.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+    
+        // Guardar la lista de puntajes actualizada en localStorage
+        localStorage.setItem("scores", JSON.stringify(scores));
+    
+        
+    
+        // Actualizar la tabla en pantalla
+        actualizarTabla();
+    }
+    
+    
+
+
+
+    // Llamar a la función cuando el jugador gana
+    registrarTiempo();
+
     videoContainer.style.display = "flex"; // Mostrar el video
 }
 
 // Ajustar tamaño inicial y actualizar al cambiar la ventana
 window.addEventListener("resize", resizeCanvas);
+
+// Función para actualizar la tabla de puntuaciones
+function actualizarTabla() {
+    const tbody = document.querySelector("#score-table tbody");
+    tbody.innerHTML = ""; // Limpiar la tabla antes de actualizarla
+
+    // Obtener los puntajes almacenados
+    const scores = JSON.parse(localStorage.getItem("scores")) || [];
+
+    scores.forEach((score) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${score.name}</td>
+            <td>${score.time} s</td>
+            <td>${score.losses}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Función para reiniciar el juego sin perder el nombre
+function restartGame() {
+    setTimeout(() => {
+        location.reload(); // Recarga la página para reiniciar el juego sin perder datos
+    }, 500);
+}
+
+// Función para regresar a la pantalla de inicio sin borrar datos
+function goToHome() {
+    setTimeout(() => {
+        document.getElementById("start-screen").style.display = "flex"; // Mostrar pantalla de inicio
+        gameOverContainer.style.display = "none"; // Ocultar Game Over
+        winContainer.style.display = "none"; // Ocultar Felicidades
+    }, 500);
+}
+
+// Esperar a que el DOM esté completamente cargado antes de asignar eventos
+document.addEventListener("DOMContentLoaded", function () {
+    setTimeout(() => {
+        // Verificar si los botones existen antes de asignar eventos
+        const retryGameBtn = document.getElementById("retry-game");
+        const goToHomeBtn = document.getElementById("go-to-home");
+        const retryWinBtn = document.getElementById("retry-win");
+        const goToHomeWinBtn = document.getElementById("go-to-home-win");
+
+        if (retryGameBtn) retryGameBtn.addEventListener("click", restartGame);
+        if (goToHomeBtn) goToHomeBtn.addEventListener("click", goToHome);
+        if (retryWinBtn) retryWinBtn.addEventListener("click", restartGame);
+        if (goToHomeWinBtn) goToHomeWinBtn.addEventListener("click", goToHome);
+    }, 300); // Pequeño retraso para asegurar que los elementos están cargados
+});
+
+
+// Esperar a que el DOM esté cargado para agregar los eventos a los botones
+document.addEventListener("DOMContentLoaded", function () {
+    // Botones de Game Over
+    document.getElementById("retry-game").addEventListener("click", restartGame);
+    document.getElementById("go-to-home").addEventListener("click", goToHome);
+
+    // Botones de Felicidades
+    document.getElementById("retry-win").addEventListener("click", restartGame);
+    document.getElementById("go-to-home-win").addEventListener("click", goToHome);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    actualizarTabla(); // Cargar los puntajes almacenados al inicio
+});
+
+
+// Llamar a la función para cargar los datos al inicio
+actualizarTabla();
+

@@ -1,12 +1,45 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Canvas con Cortina Negra</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
+
+    <!-- Pantalla de inicio con formulario y tabla -->
+    <div id="start-screen" class="overlay">
+        <div class="start-content">
+            <!-- Formulario de nombre -->
+            <div class="start-container">
+                <h2>Ingrese su nombre</h2>
+                <input type="text" id="player-name" placeholder="Escriba su nombre">
+                <button id="start-button">Iniciar Juego</button>
+            </div>
+
+            <!-- Cuadro de puntuaciones -->
+            <div class="score-container">
+                <h2>Historial de Jugadores</h2>
+                <table id="score-table">
+                    <thead>
+                        <tr>
+                            <th>Jugador</th>
+                            <th>Tiempo</th>
+                            <th>Veces Perdidas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Aquí se insertarán los datos dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
     <!-- Contenedor de objetos -->
     <div class="objetos-container">
         <h2>Objetos</h2>
@@ -18,6 +51,9 @@
         <canvas id="canvas"></canvas>
     </div>
 
+
+
     <script src="js/main.js"></script>
 </body>
+
 </html>
