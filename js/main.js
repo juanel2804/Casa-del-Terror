@@ -103,17 +103,37 @@ winContainer.style.backgroundColor = "rgba(0, 0, 0, 0.9)"; // Fondo oscuro
 winContainer.style.display = "none";
 winContainer.style.justifyContent = "center";
 winContainer.style.alignItems = "center";
-winContainer.style.zIndex = "1001"; // Sobre todo
+winContainer.style.zIndex = "1001"; // Mismo nivel que Game Over
 winContainer.innerHTML = `
-    <div style="color: white; font-size: 40px; font-weight: bold; text-align: center;">
-        ¡FELICIDADES! <br> Has encerrado al demonio.
+    <div style="color: red; font-size: 50px; font-weight: bold; text-align: center;">
+        ¡FELICIDADES!
     </div>
-    <div class="buttons-container">
-        <button id="retry-win">Volver a Intentar</button>
-        <button id="go-to-home-win">Inicio</button>
+    <div style="color: white; font-size: 30px; font-weight: bold; text-align: center; margin-top: 20px;">
+        Has encerrado al demonio.
+    </div>
+    <div class="buttons-container" style="display: flex; gap: 20px; margin-top: 30px;">
+        <button id="retry-win" style="
+            font-size: 20px;
+            padding: 10px 20px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        ">Volver a Intentar</button>
+        <button id="go-to-home-win" style="
+            font-size: 20px;
+            padding: 10px 20px;
+            background-color: white;
+            color: black;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        ">Inicio</button>
     </div>
 `;
 document.body.appendChild(winContainer);
+
 
 // Bandera para controlar los clics
 let isRevealing = false;
@@ -146,7 +166,38 @@ imageFiles.forEach((src, index) => {
 const images = [];
 const imgSize = 50;
 let imagePositions = [];
+
 let foundImages = new Set(); // Guardará los índices de las imágenes encontradas
+
+// Función para verificar si todas las imágenes han sido encontradas
+function checkWinCondition() {
+    console.log("🟡 Verificando imágenes encontradas...");
+    console.log("Imágenes encontradas hasta ahora:", Array.from(foundImages));
+
+    let indicesEsperados = new Set([...Array(imageFiles.length).keys()]); // Genera {0,1,2,3,4,5,6,7}
+    console.log("✅ Se espera que estén descubiertas estas imágenes:", Array.from(indicesEsperados));
+
+    let todasDescubiertas = [...indicesEsperados].every(index => foundImages.has(index));
+
+    if (todasDescubiertas) {
+        console.log("🎉 ¡Todas las imágenes han sido encontradas!");
+
+        setTimeout(() => {
+            if (typeof registrarTiempo === "function") {
+                registrarTiempo(); // Guardar el puntaje antes de mostrar la pantalla de victoria
+            } else {
+                console.error("⚠️ Error: registrarTiempo no está definida.");
+            }
+            console.log("🟢 Mostrando pantalla de 'Felicidades'...");
+            winContainer.style.display = "flex"; // Mostrar la pantalla de victoria
+        }, 500);
+    } else {
+        console.log("❌ Aún faltan imágenes por encontrar.");
+    }
+}
+
+
+
 let demonioPosition = null; // Posición del demonio
 
 // Función para ajustar el tamaño del canvas
@@ -220,8 +271,8 @@ function renderScene() {
     });
 
     // Aplicar la capa oscura sobre todo el canvas
-    ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 // Cargar la imagen de fondo y renderizar la escena inicial
@@ -305,26 +356,24 @@ canvas.addEventListener("click", function (e) {
                     foundImages.add(index);
                     miniaturas[index].style.opacity = "0.3";
                 });
-
+    
+                console.log("✔️ Se agregaron imágenes al conjunto foundImages:", Array.from(foundImages));
+    
+                // 🔹 Verificar si todas las imágenes fueron encontradas
+                checkWinCondition();
+    
                 renderScene();
                 isRevealing = false;
-
-                // Comprobar si todas las imágenes han sido encontradas
-                if ([...foundImages].filter(i => i !== "demonio").length === imageFiles.length) {
-                    setTimeout(() => {
-                        registrarTiempo(); // Registrar el puntaje antes de mostrar la pantalla de victoria
-                        winContainer.style.display = "flex"; // Mostrar "Felicidades"
-                    }, 500);
-                }
-
             }, 500);
         } else {
             isRevealing = false;
         }
     }, 500);
+    
+    
 
 });
-
+   
 // Función para activar el video de miedo
 function activarVideoMiedo() {
     scaryScream.play(); // Reproducir el grito
@@ -391,48 +440,141 @@ function actualizarTabla() {
     });
 }
 
-// Función para reiniciar el juego sin perder el nombre
+
+// Función para reiniciar el juego sin perder el nombre y los datos
+// Función para reiniciar el juego sin perder el nombre y acumulando las pérdidas
+// Función para reiniciar el juego sin perder el nombre y acumulando las pérdidas
 function restartGame() {
     setTimeout(() => {
-        location.reload(); // Recarga la página para reiniciar el juego sin perder datos
+        // Guardar el tiempo final antes de reiniciar
+        const endTime = new Date().getTime();
+        const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convertir a segundos
+
+        // Obtener datos previos del jugador
+        const playerName = localStorage.getItem("playerName") || "Jugador";
+        let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
+        let scores = JSON.parse(localStorage.getItem("scores")) || [];
+
+        // Registrar la pérdida en la tabla antes de reiniciar
+        scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+
+        // Ordenar la tabla por menor tiempo
+        scores.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+        localStorage.setItem("scores", JSON.stringify(scores));
+
+        // Sumar una pérdida al contador y guardarlo
+        playerLosses++;
+        localStorage.setItem("playerLosses", playerLosses);
+
+        // Ocultar la pantalla de Game Over
+        gameOverContainer.style.display = "none";
+        winContainer.style.display = "none";
+
+        // 🔹 **Reiniciar completamente el juego sin recargar la página**
+        foundImages.clear(); // Limpiar las imágenes encontradas
+        isRevealing = false; // Restablecer la linterna
+        imagePositions = []; // Borrar posiciones de imágenes
+        demonioPosition = null; // Resetear la posición del demonio
+
+        // 🔹 **Reiniciar el canvas y volver a generar las imágenes**
+        updateImagePositions();
+        renderScene();
+
+        // Restaurar opacidad de todas las miniaturas
+        miniaturas.forEach(img => img.style.opacity = "1");
+
+        // Reiniciar música desde el inicio
+        backgroundMusic.currentTime = 0;
+        backgroundMusic.play();
+
+        // Reiniciar el tiempo de inicio de la nueva partida
+        startTime = new Date().getTime();
+
     }, 500);
 }
+
+function registrarTiempo() {
+    const playerName = localStorage.getItem("playerName"); // Obtener nombre del jugador
+    if (!playerName) return;
+
+    const endTime = new Date().getTime(); // Obtener tiempo final
+    const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convertir a segundos
+
+    let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
+    let scores = JSON.parse(localStorage.getItem("scores")) || [];
+
+    scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+
+    scores.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+    localStorage.setItem("scores", JSON.stringify(scores));
+
+    console.log("🏆 Tiempo registrado:", timeTaken, "segundos");
+}
+
+function limpiarTodoLocalStorage() {
+    localStorage.clear(); // 🧹 Borra todo el almacenamiento local
+    actualizarTabla(); // Refresca la tabla en la pantalla si existe
+    console.log("🚀 LocalStorage completamente limpiado.");
+    alert("Todos los datos han sido eliminados.");
+}
+
 
 // Función para regresar a la pantalla de inicio sin borrar datos
 function goToHome() {
     setTimeout(() => {
-        document.getElementById("start-screen").style.display = "flex"; // Mostrar pantalla de inicio
-        gameOverContainer.style.display = "none"; // Ocultar Game Over
-        winContainer.style.display = "none"; // Ocultar Felicidades
+        // Mostrar pantalla de inicio correctamente
+        const startScreen = document.getElementById("start-screen");
+        startScreen.style.display = "flex";  
+        startScreen.style.opacity = "1"; // Asegurar visibilidad completa
+
+        // Ocultar pantallas de Game Over y Felicidades
+        gameOverContainer.style.display = "none";
+        winContainer.style.display = "none";
+
+        // Limpiar el campo de nombre
+        document.getElementById("player-name").value = "";
     }, 500);
 }
 
-// Esperar a que el DOM esté completamente cargado antes de asignar eventos
+
 document.addEventListener("DOMContentLoaded", function () {
     setTimeout(() => {
-        // Verificar si los botones existen antes de asignar eventos
+        // Obtener los botones de Game Over
         const retryGameBtn = document.getElementById("retry-game");
         const goToHomeBtn = document.getElementById("go-to-home");
+
+        // Obtener los botones de Felicidades
         const retryWinBtn = document.getElementById("retry-win");
         const goToHomeWinBtn = document.getElementById("go-to-home-win");
 
+        // Asegurar que todos los botones tengan las mismas funciones
         if (retryGameBtn) retryGameBtn.addEventListener("click", restartGame);
         if (goToHomeBtn) goToHomeBtn.addEventListener("click", goToHome);
-        if (retryWinBtn) retryWinBtn.addEventListener("click", restartGame);
+        if (retryWinBtn) retryWinBtn.addEventListener("click", restartGame); // ✅ Ahora funciona bien
         if (goToHomeWinBtn) goToHomeWinBtn.addEventListener("click", goToHome);
     }, 300); // Pequeño retraso para asegurar que los elementos están cargados
 });
 
 
+
 // Esperar a que el DOM esté cargado para agregar los eventos a los botones
 document.addEventListener("DOMContentLoaded", function () {
-    // Botones de Game Over
-    document.getElementById("retry-game").addEventListener("click", restartGame);
-    document.getElementById("go-to-home").addEventListener("click", goToHome);
+    // Esperar un pequeño tiempo para asegurar que los elementos existen
+    setTimeout(() => {
+        // Botones de Game Over
+        const retryGameBtn = document.getElementById("retry-game");
+        const goToHomeBtn = document.getElementById("go-to-home");
 
-    // Botones de Felicidades
-    document.getElementById("retry-win").addEventListener("click", restartGame);
-    document.getElementById("go-to-home-win").addEventListener("click", goToHome);
+        // Botones de Felicidades
+        const retryWinBtn = document.getElementById("retry-win");
+        const goToHomeWinBtn = document.getElementById("go-to-home-win");
+
+        // Verificar si los botones existen antes de asignar eventos
+        if (retryGameBtn) retryGameBtn.addEventListener("click", restartGame);
+        if (goToHomeBtn) goToHomeBtn.addEventListener("click", goToHome);
+        if (retryWinBtn) retryWinBtn.addEventListener("click", restartGame);
+        if (goToHomeWinBtn) goToHomeWinBtn.addEventListener("click", goToHome);
+    }, 300); // Pequeño retraso para asegurar que los elementos están cargados
 });
 
 document.addEventListener("DOMContentLoaded", function () {
