@@ -117,6 +117,26 @@ h2{
     transition: all 0.3s ease-in-out;
 }
 
+/* 📱 RESPONSIVIDAD PARA MÓVILES Y TABLETS */
+@media (max-width: 1024px) {
+    .start-content {
+        flex-direction: column; /* Apilar los elementos en pantallas pequeñas */
+        align-items: center;
+    }
+
+    .start-container,
+    .score-container,
+    .instructions-container {
+        width: 90%; /* Ocupar más espacio en pantallas pequeñas */
+        max-width: 400px; /* Evitar que sean demasiado grandes */
+    }
+
+    /* 🎮 Ajustar tamaño de botones */
+    .buttons-container button {
+        font-size: 18px;
+        padding: 12px 20px;
+    }
+}
 /* Efecto de iluminación al pasar el mouse */
 .start-container:hover,
 .score-container:hover,
