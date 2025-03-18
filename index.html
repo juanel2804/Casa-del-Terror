@@ -9,25 +9,30 @@
 </head>
 
 <body>
+    <header>
+        <h1 style="color: red; ">Escapa del cuarto</h1>
+    </header>
+
 
     <!-- Pantalla de inicio con formulario y tabla -->
     <div id="start-screen" class="overlay">
         <div class="start-content">
+
             <!-- Formulario de nombre -->
             <div class="start-container">
                 <h2>Ingrese su nombre</h2>
                 <input type="text" id="player-name" placeholder="Escriba su nombre">
                 <button id="start-button">Iniciar Juego</button>
                 <button onclick="limpiarTodoLocalStorage()" style="
-    font-size: 18px;
-    padding: 10px 20px;
-    background-color: red;
-    color: white;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 20px;
-">🧹 Borrar Todo</button>
+                font-size: 18px;
+                padding: 10px 20px;
+                background-color: red;
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-weight: bold;
+                margin-top: 20px;
+            ">🧹 Borrar Todo</button>
 
             </div>
 
@@ -47,14 +52,27 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Cuadro de instrucciones del juego -->
+            <div class="instructions-container">
+                <h2>Instrucciones</h2>
+                <p>Bienvenido a <strong>Escapa del cuarto</strong>. Tu misión es encontrar y recolectar todos los
+                    objetos ocultos antes de que el demonio te atrape.</p>
+                <ul>
+                    <li>Usa el <strong>ratón</strong> para hacer clic en las áreas oscuras y revelar los objetos.</li>
+                    <li>Si encuentras al demonio, perderás la partida.</li>
+                    <li>Encuentra todos los objetos lo más rápido posible para obtener una mejor puntuación.</li>
+                </ul>
+            </div>
+
         </div>
     </div>
 
 
     <!-- Contenedor de objetos -->
     <div class="objetos-container">
-        <h2>Objetos</h2>
-        <div id="objetos-lista" class="objetos-lista"></div>
+        <h2 id="objetos-lista" class="objetos-lista">Objetos</h2>
+
     </div>
 
     <!-- Contenedor del canvas para que no se desborde -->
@@ -62,6 +80,11 @@
         <canvas id="canvas"></canvas>
     </div>
 
+    <footer>
+        <div style="background-color: rgb(119, 120, 121);">
+            <a style="color: wheat;"> DEsarrollador: Juan Elpidio Lopez Garcia</a>
+        </div>
+    </footer>
 
 
     <script src="js/main.js"></script>

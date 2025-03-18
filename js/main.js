@@ -277,8 +277,8 @@ function renderScene() {
     });
 
     // Aplicar la capa oscura sobre todo el canvas
-    // ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
+    //ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    //ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 // Cargar la imagen de fondo y renderizar la escena inicial
@@ -494,26 +494,32 @@ function restartGame() {
 }
 
 
-function registrarTiempo(haGanado) {
-    const playerName = localStorage.getItem("playerName");
+function registrarTiempo() {
+    const playerName = localStorage.getItem("playerName"); // Obtener nombre del jugador
     if (!playerName) return;
 
-    let scores = JSON.parse(localStorage.getItem("scores")) || [];
+    const endTime = new Date().getTime(); // Obtener tiempo final
+    const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convertir a segundos
+
+    // Obtener la cantidad de veces que perdió el jugador antes de ganar
     let playerLosses = parseInt(localStorage.getItem("playerLosses")) || 0;
 
-    if (haGanado) {
-        const endTime = new Date().getTime();
-        const timeTaken = ((endTime - startTime) / 1000).toFixed(2);
-        scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
-        console.log(`🏆 ${playerName} ganó en ${timeTaken} segundos con ${playerLosses} derrotas.`);
-    } else {
-        console.log(`💀 ${playerName} ha perdido. No se registra el tiempo.`);
-    }
+    // Obtener datos previos del localStorage
+    let scores = JSON.parse(localStorage.getItem("scores")) || [];
 
+    // Agregar la nueva entrada de puntaje
+    scores.push({ name: playerName, time: timeTaken, losses: playerLosses });
+
+    // Ordenar la tabla por tiempo (menor tiempo es mejor)
     scores.sort((a, b) => parseFloat(a.time) - parseFloat(b.time));
+
+    // Guardar la lista de puntajes actualizada en localStorage
     localStorage.setItem("scores", JSON.stringify(scores));
+
+    // Actualizar la tabla en pantalla
     actualizarTabla();
 }
+
 
 
 

@@ -1,9 +1,10 @@
 body {
     margin: 0;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
     height: 100vh;
     background-color: black;
@@ -39,18 +40,24 @@ canvas {
         0px 0px 15px rgba(255, 69, 0, 0.8); /* Brillo naranja simulando fuego */
 }
 
+h1{
+    margin-top: 0px;
+}
+h2{
+    margin-top: -8px;
+}
 
 /* Contenedor de objetos */
 .objetos-container {
     width: 80vw; /* Igual al ancho del canvas */
     text-align: center;
     margin-bottom: 10px;
-    padding: 10px;
+  
     background: rgba(0, 0, 0, 0.7);
-    border-radius: 15px;
     color: white;
     font-size: 18px;
     font-family: Arial, sans-serif;
+    height: 6vh;
 }
 
 /* Lista de objetos */
@@ -59,6 +66,7 @@ canvas {
     justify-content: center;
     gap: 10px;
     flex-wrap: wrap;
+    
 }
 
 /* Miniaturas de los objetos */
@@ -88,19 +96,88 @@ canvas {
 /* Contenedor de la pantalla de inicio */
 .start-content {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+   
+    
     gap: 20px;
+}
+
+/* Estilos generales para los cuadros */
+.start-container,
+.score-container,
+.instructions-container {
+    background: rgba(10, 10, 10, 0.95); /* Fondo oscuro más elegante */
+    padding: 25px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0px 0px 15px rgba(255, 140, 0, 0.4); /* Sombra anaranjada sutil */
+    width: 350px;
+    font-family: 'Arial', sans-serif;
+    color: white;
+    border: none;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Efecto de iluminación al pasar el mouse */
+.start-container:hover,
+.score-container:hover,
+.instructions-container:hover {
+    box-shadow: 0px 0px 20px rgba(255, 200, 0, 0.6);
+}
+
+#player-name:focus {
+    background: #333;
+    box-shadow: inset 2px 2px 8px rgba(255, 255, 255, 0.3);
 }
 
 /* Formulario de entrada */
 .start-container, .score-container {
-    background: white;
+    
     padding: 20px;
     border-radius: 10px;
     text-align: center;
     box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
     width: 350px;
+}
+
+#start-button {
+    font-size: 18px;
+    padding: 12px 25px;
+    background: linear-gradient(135deg, #ff4500, #ffcc00);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 10px;
+    margin-top: 15px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0px 4px 10px rgba(255, 140, 0, 0.5);
+    text-transform: uppercase;
+
+}
+
+#start-button:hover {
+    background: linear-gradient(135deg, #ffcc00, #ff4500);
+    transform: scale(1.1);
+    box-shadow: 0px 4px 15px rgba(255, 204, 0, 0.8);
+}
+
+/* Botón para borrar datos */
+.start-container button[onclick="limpiarTodoLocalStorage()"] {
+    background-color: #d11a2a;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+    border: 2px solid white;
+    box-shadow: 0px 4px 10px rgba(255, 0, 0, 0.5);
+}
+
+/* Efecto hover para el botón de borrar */
+.start-container button[onclick="limpiarTodoLocalStorage()"]:hover {
+    background-color: #ff4d4d;
+    transform: scale(1.1);
+    box-shadow: 0px 4px 15px rgba(255, 0, 0, 0.8);
 }
 
 /* Tabla de puntuaciones */
@@ -113,6 +190,9 @@ canvas {
     border: 1px solid black;
     padding: 8px;
     text-align: center;
+    border: 1px solid rgb(255, 255, 255);
+    min-width: 100px; /* Evita que las columnas se encojan demasiado */
+    background: rgba(255, 255, 255, 0.1);
 }
 
 #score-table th {
@@ -120,7 +200,21 @@ canvas {
     color: white;
 }
 
+.score-container {
+    max-height: 250px; /* Altura máxima antes de que aparezca el scroll */
+   overflow-y: auto;
+   overflow-x: hidden;
+    border: 1px solid black; /* Borde para resaltar */
+}
 
+/* Fijar la cabecera de la tabla */
+#score-table thead {
+    position: sticky;
+    top: 0;
+    background: black; /* Fijamos el color del fondo para que se vea bien */
+    color: white;
+    z-index: 2;
+}
 
 /* Contenedor de botones en Game Over y Felicidades */
 .buttons-container {
@@ -146,7 +240,221 @@ canvas {
     color: white;
 }
 
+/* Estilos responsivos */
+@media screen and (max-width: 768px) {
+    .start-container, .score-container {
+        width: 90%;
+        max-width: 400px;
+    }
 
- 
+    .objetos-container {
+        width: 95%;
+        padding: 5px;
+    }
 
+    .canvas-container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    canvas {
+        width: 95vw;
+        height: auto;
+        max-width: 100%;
+    }
+
+    .objetos-lista {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .objetos-lista img {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+/* Asegurar que el footer quede bien posicionado */
+footer {
+    width: 100%;
+    text-align: center;
+    background: #111;
+    color: white;
+    padding: 10px;
+    position: relative;
+    bottom: 0;
+    left: 0;
+}
+
+.start-container h2,
+.score-container h2,
+.instructions-container h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+    color: #ffcc00; /* Color dorado */
+    text-shadow: 0px 0px 10px rgba(255, 204, 0, 0.8);
+}
+
+/* Input de nombre */
+#player-name {
+    width: 90%;
+    padding: 12px;
+    font-size: 18px;
+    border: 2px solid #ffcc00;
+    border-radius: 8px;
+    outline: none;
+    text-align: center;
+    background: #111;
+    color: white;
+    box-shadow: inset 2px 2px 5px rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Efecto cuando el input está enfocado */
+#player-name:focus {
+    background: #222;
+    box-shadow: inset 2px 2px 8px rgba(255, 255, 255, 0.3);
+}
+
+
+/* Estilos para el cuadro de instrucciones */
+.instructions-container {
+    
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5);
+    width: 350px;
+
+}
+
+.instructions-container h2 {
+    margin-bottom: 10px;
+    font-size: 22px;
+}
+
+.instructions-container p {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.instructions-container ul {
+    text-align: left;
+    padding-left: 20px;
+}
+
+.instructions-container li {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+
+
+/* 🔥 Contenedor de Game Over y Felicidades */
+#game-over-container,
+#win-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* 🎮 Estilo del texto Game Over */
+#game-over-container div:first-child {
+    color: red;
+    font-size: 100px;
+    font-weight: bold;
+    text-shadow: 0px 0px 20px rgba(255, 0, 0, 0.8);
+    margin-bottom: 30px;
+    animation: flicker 1s infinite alternate;
+}
+
+/* 🎉 Estilo del texto de victoria */
+#win-container div:first-child {
+    color: white;
+    font-size: 60px;
+    font-weight: bold;
+    text-shadow: 0px 0px 20px rgba(255, 255, 255, 0.8);
+    margin-bottom: 30px;
+}
+
+
+/* 💀 Botón "Volver a Intentar" */
+#retry-game,
+#retry-win {
+    background: linear-gradient(135deg, #8b0000, #ff0000);
+    color: white;
+    border: 2px solid rgba(255, 0, 0, 0.7);
+    box-shadow: 0px 4px 15px rgba(255, 0, 0, 0.6);
+}
+
+#retry-game:hover,
+#retry-win:hover {
+    background: linear-gradient(135deg, #ff0000, #8b0000);
+    transform: scale(1.1);
+    box-shadow: 0px 4px 20px rgba(255, 0, 0, 1);
+}
+
+/* 🏠 Botón "Inicio" */
+#go-to-home,
+#go-to-home-win {
+    background: linear-gradient(135deg, #004d00, #00b300);
+    color: white;
+    border: 2px solid rgba(0, 255, 0, 0.7);
+    box-shadow: 0px 4px 15px rgba(0, 128, 0, 0.6);
+}
+
+#go-to-home:hover,
+#go-to-home-win:hover {
+    background: linear-gradient(135deg, #00b300, #004d00);
+    transform: scale(1.1);
+    box-shadow: 0px 4px 20px rgba(0, 255, 0, 1);
+}
+
+/* ✨ Animación de parpadeo en Game Over */
+@keyframes flicker {
+    0% {
+        opacity: 1;
+        text-shadow: 0px 0px 15px rgba(255, 0, 0, 0.8);
+    }
+    100% {
+        opacity: 0.7;
+        text-shadow: 0px 0px 25px rgba(255, 0, 0, 1);
+    }
+}
+
+/* 🎮 Estilos generales para botones */
+.buttons-container button {
+    font-size: 22px;
+    padding: 15px 40px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 12px;
+    transition: all 0.3s ease-in-out;
+    text-transform: uppercase;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Efecto de brillo en los botones */
+.buttons-container button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 300%;
+    height: 300%;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 10%, transparent 80%);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+}
+
+.buttons-container button:hover::before {
+    opacity: 1;
+}
 
