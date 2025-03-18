@@ -137,6 +137,59 @@ h2{
         padding: 12px 20px;
     }
 }
+
+
+@media (max-width: 768px) {
+    .start-container,
+    .score-container,
+    .instructions-container {
+        width: 100%; /* Ocupar todo el ancho en dispositivos pequeños */
+        max-width: 350px;
+    }
+
+    /* 📝 Ajuste de la tabla en pantallas pequeñas */
+    #score-table th,
+    #score-table td {
+        font-size: 14px;
+        padding: 6px;
+    }
+
+    /* 🔘 Botones más grandes en móviles */
+    .buttons-container button {
+        font-size: 16px;
+        padding: 10px 18px;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .start-container,
+    .score-container,
+    .instructions-container {
+        width: 95%;
+        max-width: 320px;
+        padding: 15px;
+    }
+
+    /* 🔘 Ajustar tamaño del input */
+    #player-name {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    /* 🔘 Botones más accesibles */
+    .buttons-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .buttons-container button {
+        font-size: 16px;
+        padding: 12px;
+        width: 100%;
+    }
+}
+
 /* Efecto de iluminación al pasar el mouse */
 .start-container:hover,
 .score-container:hover,
