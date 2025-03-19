@@ -143,7 +143,7 @@ let losses = 0; // Contador de veces que el jugador ha perdido
 
 // Cargar imagen de fondo
 const img = new Image();
-img.src = "Casa-del-Terror/fondo/recama.jpg"; // Ruta de la imagen
+img.src = "fondo/recama.jpg"; // Ruta de la imagen
 
 // Cargar imágenes adicionales (objetos normales + el demonio)
 const imageFiles = ["c-1.jpg", "c-2.jpg", "c-3.jpg", "c-4.jpg", "c-5.jpg", "c-6.jpg", "c-7.jpg", "c-8.jpg"];
@@ -156,7 +156,7 @@ const miniaturas = [];
 
 imageFiles.forEach((src, index) => {
     const imgElement = document.createElement("img");
-    imgElement.src = `Casa-del-Terror/fondo/${src}`;
+    imgElement.src = `fondo/${src}`;
     imgElement.alt = `Objeto ${index + 1}`;
     imgElement.dataset.index = index;
     objetosLista.appendChild(imgElement);
@@ -239,7 +239,7 @@ let imagesLoaded = 0; // Contador para verificar si todas las imágenes han sido
 
 allImages.forEach((src, index) => {
     images[index] = new Image();
-    images[index].src = `Casa-del-Terror/fondo/${src}`;
+    images[index].src = `fondo/${src}`;
 
     // Verificar que todas las imágenes se hayan cargado antes de iniciar el juego
     images[index].onload = () => {
