@@ -156,7 +156,7 @@ const miniaturas = [];
 
 imageFiles.forEach((src, index) => {
     const imgElement = document.createElement("img");
-    imgElement.src = `fondo/${src}`;
+    imgElement.src = `/Casa-del-Terror/fondo/${src}`;
     imgElement.alt = `Objeto ${index + 1}`;
     imgElement.dataset.index = index;
     objetosLista.appendChild(imgElement);
