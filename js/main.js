@@ -277,8 +277,8 @@ function renderScene() {
     });
 
     // Aplicar la capa oscura sobre todo el canvas
-    //ctx.fillStyle = "rgba(0, 0, 0, 1)";
-    //ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 // Cargar la imagen de fondo y renderizar la escena inicial
